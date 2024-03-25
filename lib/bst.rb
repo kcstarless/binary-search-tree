@@ -91,6 +91,27 @@ class Tree
     end
   end
 
+  # Write a level_order method which accepts a block. This method should
+  # traverse the tree in breadth-first level order and yield each node to the provided block.
+
+  def level_order(node = @root, queue = [], list = [])
+    return nil if node.nil?
+
+    queue.append(node)
+
+    until queue.empty?
+      node = queue.shift
+
+      yield node if block_given?
+
+      list.append(node.value)
+
+      queue.append(node.left) if node.left
+      queue.append(node.right) if node.right
+    end
+    list
+  end
+
   def pretty_print(node = @root, prefix = '', is_left = true)
     pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
     puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.value}"
