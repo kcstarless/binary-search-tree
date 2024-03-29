@@ -11,7 +11,7 @@ end
 
 # Tree class
 class Tree
-  attr_accessor :node
+  # attr_accessor :node
 
   def initialize(array)
     @root = build_tree(array.sort.uniq)
@@ -32,7 +32,7 @@ class Tree
   def insert(value, node = @root)
     return Node.new(value) if node.nil?
 
-    return 'value already exist' if node.value == value
+    return node if node.value == value
 
     if value < node.value
       node.left = insert(value, node.left)
@@ -80,14 +80,14 @@ class Tree
   end
 
   def find(value, node = @root)
-    return 'no value found' if node.nil?
+    return nil if node.nil?
 
-    return node.value if node.value == value
+    return node if node.value == value
 
     if value < node.value
-      node.left = find(value, node.left)
+      find(value, node.left)
     else
-      node.right = find(value, node.right)
+      find(value, node.right)
     end
   end
 
@@ -110,6 +110,74 @@ class Tree
       queue.append(node.right) if node.right
     end
     list
+  end
+
+  # Write #inorder, #preorder, and #postorder methods that accepts a block.
+  # Each method should traverse the tree in their respective depth-first order
+  # and yield each node to the provided block. The methods should return an array of values
+  # if no block is given.
+
+  def inorder(node = @root, list = [], &block)
+    return nil if node.nil?
+
+    inorder(node.left, list, &block)
+    block_given? ? block.call(node) : list.append(node.value)
+    inorder(node.right, list, &block)
+    list
+  end
+
+  def preorder(node = @root, list = [], &block)
+    return nil if node.nil?
+
+    block_given? ? block.call(node) : list.append(node.value)
+    preorder(node.left, list, &block)
+    preorder(node.right, list, &block)
+    list
+  end
+
+  def postorder(node = @root, list = [], &block)
+    return nil if node.nil?
+
+    postorder(node.left, list, &block)
+    postorder(node.right, list, &block)
+    block_given? ? block.call(node) : list.append(node.value)
+    list
+  end
+
+  def height(node)
+    return -1 if node.nil?
+
+    left_height = height(node.left) + 1
+    right_height = height(node.right) + 1
+
+    [left_height, right_height].max
+  end
+
+  def depth(node, start = @root, count = 0)
+    return count if start.nil?
+
+    return count if node.value == start.value
+
+    if node.value < start.value
+      depth(node, start.left, count + 1)
+    else
+      depth(node, start.right, count + 1)
+    end
+  end
+
+  def balanced?(node = @root)
+    return true if node.nil?
+
+    left_height = height(node.left).abs
+    right_height = height(node.right).abs
+
+    return false if (left_height - right_height).abs > 1
+
+    balanced?(node.left) && balanced?(node.right)
+  end
+
+  def rebalance
+    @root = build_tree(inorder)
   end
 
   def pretty_print(node = @root, prefix = '', is_left = true)
